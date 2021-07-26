@@ -1,129 +1,123 @@
-var input = document.getElementById("input");
-var i = 0;
+var id = 0;
 var itensDaLista = [];
-var txtItem
-carregarLista()
+var txtItem;
+var riscadoSalvo = localStorage.getItem("riscado");
 
+function addItemNaLista(){
+    let input = document.getElementById("input");
 
- function addItemNaLista(){
-    if (input.value.length>0)
+    if (input.value != "")
         txtItem = input.value; 
     
-    
-    if(txtItem.length>0){
-        i++
+    if(txtItem.value != ""){
+        id++
         
-        var divMain = document.getElementById("content");
-        var divChild = document.createElement("div")
-        var checkbox = document.createElement("input");
-        var botao = document.createElement('button');
-        var lixo = document.createElement('img')
-         
-        var labelCheckbox = document.createElement("label");
-         
-        
-
-        labelCheckbox.setAttribute("id","label"+ i);
+        let checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.setAttribute("id", "checkbox"+ i);
-        botao.setAttribute("id", "botao"+ i);
-        divChild.setAttribute("id", "div"+ i);
-        divChild.classList.add("espacamentoDivChild");
+        checkbox.setAttribute("id", "checkbox"+ id);        
+         
+        let labelCheckbox = document.createElement("label");
+        labelCheckbox.setAttribute("id","label"+ id);
         
+        if (riscadoSalvo != null) {
+            if (riscadoSalvo[id-1] == "s") {
+                labelCheckbox.classList.add("textoRiscado");
+                checkbox.checked = true;
+            }
+        }
         
-          
-        
-
+        let lixo = document.createElement('img');
         lixo.src = ".//trash-empty-icon.png";
         lixo.style.maxWidth = "20px"; 
         
+        let botao = document.createElement('button');
+        botao.setAttribute("id", "botao"+ id);
         botao.appendChild(lixo);
-        labelCheckbox.innerHTML =  txtItem;
-        
+        labelCheckbox.innerHTML = txtItem;
+
+        let divChild = document.createElement("div");
+        divChild.setAttribute("id", "div"+ id);
+        divChild.classList.add("espacamentoDivChild");
         divChild.appendChild(checkbox);
         divChild.appendChild(labelCheckbox);
         divChild.appendChild(botao);
+     
+        document.getElementById("content").appendChild(divChild);
         
-        divMain.appendChild(divChild);
-        /* novoItem.innerHTML = txtItem; */
         itensDaLista.push(txtItem)
         salvarLista()
         botao.addEventListener("click", function(){
-            let divDeletar
-            let labelDeletar  
-            
-            if (this.id.length>=7){
-                labelDeletar = document.getElementById("label"+this.id.substring(this.id.length-2, this.id.length))
-                divDeletar = document.getElementById("div"+this.id.substring(this.id.length-2, this.id.length));
-            }
-            else{
-                labelDeletar = document.getElementById("label"+this.id.substring(this.id.length-1, this.id.length))
-                divDeletar = document.getElementById("div"+this.id.substring(this.id.length-1, this.id.length));
-            }
-            console.log(labelDeletar.innerHTML)
-            itensDaLista.splice(itensDaLista.indexOf(labelDeletar.innerHTML),1)
-            divDeletar.remove();
-            salvarLista();
-            
-            
-            
-        }); 
-        
-    
+            if (confirm("Apagar o item?")) {
+                let divDeletar
+                let labelDeletar  
+                
+                if (this.id.length>=7){
+                    labelDeletar = document.getElementById("label"+this.id.substring(this.id.length-2, this.id.length))
+                    divDeletar = document.getElementById("div"+this.id.substring(this.id.length-2, this.id.length));
+                }
+                else{
+                    labelDeletar = document.getElementById("label"+this.id.substring(this.id.length-1, this.id.length))
+                    divDeletar = document.getElementById("div"+this.id.substring(this.id.length-1, this.id.length));
+                }
 
-        
-    }
-    function salvarLista(){
-        localStorage.setItem("lista", JSON.stringify(itensDaLista));
+                itensDaLista.splice(itensDaLista.indexOf(labelDeletar.innerHTML),1)
+                divDeletar.remove();
+                salvarLista();
+            }       
+        });
     }
     
-    
-
     input.value="";
     input.focus();
    
+    $(document).click(function(){
+        if(id>0){
+            for (let j = 1; j <= id; j++){
+                let label = document.getElementById("label"+j);
+                let chk = document.getElementById("checkbox"+j);
 
-
-
-
-
-
-$(document).click(function(){
-    
-    if(i>0){
-        for (var j = 1; j <= i; j++){
-            let label = document.getElementById("label"+j)
-            let chk = document.getElementById("checkbox"+j)
-            if (chk != null){
-                if(document.getElementById("checkbox"+j).checked){
-                
-                    label.classList.add("textoRiscado");
-                }else {
-                    label.classList.remove("textoRiscado");
-                  
+                if (chk != null) {
+                    if(chk.checked){
+                        label.classList.add("textoRiscado");
+                    } else {
+                        label.classList.remove("textoRiscado");
+                    }
                 }
             }
-            
-               
-            }
+
+            checkboxSalvo();
         }
+    })
+}
 
-    
-    
+function salvarLista(){
+    localStorage.setItem("lista", JSON.stringify(itensDaLista));
+}
 
-})
+function checkboxSalvo() {
+    let riscados = [];
 
+    for (let i = 1; i <= id; i++) {
+        let checkbox = document.getElementById("checkbox"+i);
 
- }
- function carregarLista(){
-    var listaLocalStorage = localStorage.getItem("lista");
-    listaLocalStorage= JSON.parse(listaLocalStorage)
-    for (var i=0; i<listaLocalStorage.length; i++){
-        txtItem = listaLocalStorage[i]
-        addItemNaLista();
-        
-
+        if (checkbox != null) {
+            checkbox.type = "checkbox";
+            riscados.push(checkbox.checked ? "s" : "n");
+            localStorage.setItem("riscado", JSON.stringify(riscados));
+        }           
     }
-    
+}
 
+function carregarLista(){
+    let listaLocalStorage = localStorage.getItem("lista");
+
+    if (listaLocalStorage != null) {
+        listaLocalStorage= JSON.parse(listaLocalStorage);
+        riscadoSalvo = JSON.parse(riscadoSalvo);
+
+        for (let i = 0; i < listaLocalStorage.length; i++){
+            txtItem = listaLocalStorage[i];
+            addItemNaLista();
+        }
+    }
 }
